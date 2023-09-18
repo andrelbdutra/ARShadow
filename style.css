@@ -12,7 +12,6 @@ body {
     width: 100%;
 }
 
-
 .box {
     display: flex;
     flex-direction: column;
@@ -36,8 +35,8 @@ body {
     color: black;
     font-size: 60px;
     position: fixed;
-    right: 20px;
-    bottom: 20px;
+    right: 40px;
+    bottom: 40px;
     transition: background 0.25s;
     cursor: pointer;
     outline: white;
@@ -48,8 +47,8 @@ body {
 }
 
 .floating-canvas {
-    width: 100px;
-    height: 100px;
+    width: 15%;
+    height: 15%;
     border: 1px solid rgba(221, 221, 221, 0.678);
     display: flex;
     align-items: center;

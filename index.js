@@ -3,6 +3,8 @@ var largura = window.innerWidth;
 var video = document.querySelector('video');
 video.height = altura;
 video.width = largura;
+video.facingMode = "environment";
+
 navigator.mediaDevices.getUserMedia({video: true})
 .then(stream => {
     video.srcObject = stream;
