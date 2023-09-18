@@ -1,0 +1,60 @@
+html {
+    height: 100%;
+    background: yellow;
+}
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    max-height: 100%;
+    background: green;
+    float: left;
+    width: 100%;
+}
+
+
+.box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    height: 100%;
+}
+
+.floating-btn {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255, 255, 255, 0.74);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid black;
+    border-radius: 50%;
+    color: black;
+    font-size: 60px;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    transition: background 0.25s;
+    cursor: pointer;
+    outline: white;
+}
+.floating-btn:active {
+    background-color: rgba(22, 22, 22, 0.555);
+    color: white;
+}
+
+.floating-canvas {
+    width: 100px;
+    height: 100px;
+    border: 1px solid rgba(221, 221, 221, 0.678);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+}
