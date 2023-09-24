@@ -11,8 +11,10 @@
 
 <body>
     <div class="box">
-        <video autoplay></video>
-        <button href="" class="material-icons floating-btn">photo_camera</button>
+        <!-- <input type="file" accept="image/*" capture="camera"> -->
+        <video id="video"></video>
+        <button id="takePhotoBtn" class="material-icons floating-btn-take-photo">photo_camera</button>
+        <button id="switchCameraBtn" class="material-icons floating-btn-switch-camera">switch_camera</button>
         <canvas class="floating-canvas"></canvas>
     </div>
     <script src="./index.js"></script>

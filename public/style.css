@@ -8,6 +8,7 @@ body {
     max-height: 100%;
     float: left;
     width: 100%;
+    background-color: black;
 }
 
 .box {
@@ -20,7 +21,7 @@ body {
     height: 100%;
 }
 
-.floating-btn {
+.floating-btn-take-photo {
     width: 80px;
     height: 80px;
     background-color: rgba(255, 255, 255, 0.74);
@@ -33,13 +34,37 @@ body {
     color: black;
     font-size: 60px;
     position: fixed;
-    right: 40px;
-    bottom: 40px;
+    right: 2%;
+    bottom: 2%;
     transition: background 0.25s;
     cursor: pointer;
     outline: white;
 }
-.floating-btn:active {
+.floating-btn-take-photo:active {
+    background-color: rgba(22, 22, 22, 0.555);
+    color: white;
+}
+
+.floating-btn-switch-camera {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255, 255, 255, 0.74);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid black;
+    border-radius: 50%;
+    color: black;
+    font-size: 60px;
+    position: fixed;
+    right: 2%;
+    top: 2%;
+    transition: background 0.25s;
+    cursor: pointer;
+    outline: white;
+}
+.floating-btn-switch-camera:active {
     background-color: rgba(22, 22, 22, 0.555);
     color: white;
 }
