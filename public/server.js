@@ -22,7 +22,8 @@ app.post('/upload', (req, res) => {
     const image = req.body.image;
     // resposta de sucesso
     const processResult = {
-      result: '(0, 1, 0)',
+      result: [0,3,0],
+
       imageReceived: true, 
     };
   
