@@ -851,13 +851,13 @@ function enhanceDirectionalLight(mask, mv, groundTruth, initialVector, objectPos
 	light.position.set(v6.x, v6.y, v6.z);
 
 	// desenha o grafico
-	if (!first)
+	if (first)
 	{
 		var grid = 0;
 		while (Math.pow(++grid, 2) < v3len);
 		var size = Math.max(grid * 256, 4096);
 		var sqr = Math.floor(size / grid);
-		size = Math.min(sqr * grid, 16384); // limite do chrome (area: 268.435.456 pixels) para o canvas. O limite do firefox é maior, entao esse valor serve para ambos
+		size = Math.min(sqr * grid, (16384/2)); // limite do chrome (area: 268.435.456 pixels) para o canvas. O limite do firefox é maior, entao esse valor serve para ambos
 		var canvas2 = document.createElement("canvas");
 		canvas2.width  = size;
 		canvas2.height = size;
