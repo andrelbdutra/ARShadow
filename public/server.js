@@ -9,29 +9,29 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(cors());
 
-// Certificado ssl (não válidado)
-// const openSSL = {
-//   key: fs.readFileSync('./ssl/key.pem'),
-//   cert: fs.readFileSync('./ssl/cert.pem')
-// };
-
 // Configurar o Express para servir arquivos estáticos na pasta "public"
 app.use(express.static('public'));
 
 app.post('/upload', (req, res) => {
-    const image = req.body.image;
-    // resposta de sucesso
-    const processResult = {
-      result: [0,3,0],
-
+  const image = req.body.image;
+  // resposta de sucesso
+  const processResult = {
+      result: [-0.04780066504223751, 5.23935357881906, -3.1428021252333442],
+      image: 'assets/images/imagem1.png',
       imageReceived: true, 
     };
-  
+    
     res.json(processResult);
-});
-
-app.listen(process.env.PORT || 3000)
-
+  });
+  
+  app.listen(process.env.PORT || 3000) // para deploy na railway
+  
+  // para executar localmente
+  // Certificado ssl (não válidado)
+//   const openSSL = {
+//     key: fs.readFileSync('./ssl/key.pem'),
+//     cert: fs.readFileSync('./ssl/cert.pem')
+//   };
 // const server = https.createServer(openSSL, app);
 // server.listen(port, () => {
 //     const os = require('os');

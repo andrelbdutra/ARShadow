@@ -78,16 +78,14 @@ function createTeapot()
       obj.position.set(0.0, 0.5, 0.0);
    scene.add(obj);
 }
-var altura = window.innerHeight;
-var largura = window.innerWidth;
 function setSource(type, url)
 {
    if(AR.source) AR.source = null
-
+   
    AR.source = new ARjs.Source({	
-	   sourceType : type,
+      sourceType : type,
       sourceUrl : url,
-        // resolution of at which we initialize the source image
+      // resolution of at which we initialize the source image
       sourceWidth: 1280,
       sourceHeight: 960,
       // resolution displayed for the source
@@ -103,6 +101,8 @@ function setSource(type, url)
 }
 
 function onResize(){
+   var altura = window.innerHeight;
+   var largura = window.innerWidth;
 	AR.source.onResizeElement()
 	AR.source.copyElementSizeTo(renderer.domElement)
    AR.source.displayHeight = altura

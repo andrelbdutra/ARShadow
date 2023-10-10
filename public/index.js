@@ -2,7 +2,8 @@ var altura = window.innerHeight;
 var largura = window.innerWidth;
 var video = document.getElementById("video");
 const ar_module = document.createElement("script");
-ar_module.setAttribute("src", "arModule.js");
+//ar_module.setAttribute("src", "arModule.js");
+ar_module.setAttribute("src", "my-script.js");
 ar_module.setAttribute("type", "module");
 ar_module.setAttribute("async", "");
 video.style.width = largura + "px";
@@ -10,6 +11,7 @@ video.style.height = altura + "px";
 video.setAttribute("autoplay", "");
 video.setAttribute("muted", "");
 video.setAttribute("playsinline", "");
+export var image = ''
 export var lightVector
 var facingMode = "environment";
 var constraints = {
@@ -86,12 +88,13 @@ document.getElementById("takePhotoBtn").addEventListener("click", async () => {
         const element4 = document.getElementById("floating-canvas");
         element1.remove();
         element2.remove();
-        element3.remove();
+        //element3.remove();
         element4.remove();
         const result = await response.json();
         if (result.imageReceived) {
           console.log(result);
           lightVector = result.result
+          image = result.image
           //const ele = document.getElementById('box');
           //ele.appendChild(ar_module)
           document.body.appendChild(ar_module);
