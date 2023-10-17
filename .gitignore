@@ -1,1 +1,3 @@
 node_modules/
+public/output
+public/model/model.pb
