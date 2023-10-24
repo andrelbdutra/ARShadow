@@ -2,11 +2,10 @@ import * as THREE from 'three';
 import GUI from '../libs/util/dat.gui.module.js'
 import {TeapotGeometry} from './build/jsm/geometries/TeapotGeometry.js';
 import {ARjs}    from  './libs/AR/ar.js';
-import { lightVector } from './index.js';
 
 // init scene and camera
 let scene, camera, renderer, light;
-renderer	= new THREE.WebGLRenderer({antialias: true, alpha: true});
+renderer	= new THREE.WebGLRenderer({antialias: true, alpha: true,  preserveDrawingBuffer: true});
 	//renderer.shadowMap.type = THREE.VSMShadowMap;
 	renderer.shadowMap.enabled = true;
    renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
@@ -20,7 +19,8 @@ camera = new THREE.Camera();
    scene.add(camera);
 //light = initDefaultSpotlight(scene, new THREE.Vector3(25, 30, 20)); // Use default light
 light = new THREE.DirectionalLight( 0xffffff, 1 );
-light.position.set(lightVector[0], lightVector[1], lightVector[2])
+//light.position.set(lightVector[0], lightVector[1], lightVector[2])
+light.position.set(0, 3, 0)
 light.target.position.set(0, 0, 0)
 scene.add(light.target)
 light.castShadow = true;
@@ -142,3 +142,56 @@ function setARStuff()
    AR.source = 'webcam',null;
    setSource('webcam',null)   
 }
+
+function photoOnCanvas() {
+   var strMime = "image/jpeg";
+   let imgData = renderer.domElement.toDataURL(strMime);
+   return imgData
+ }
+
+document.getElementById("takePhotoBtn").addEventListener("click", async () => {
+   const dataURL = photoOnCanvas();
+   if (dataURL) {
+     // const newWindow = window.open(); // abre imagem em outra aba
+     // newWindow.document.write(`<img src="${dataURL}" />`);
+     const formData = new FormData();
+     formData.append("image", dataURL);
+     try {
+       const response = await fetch("/upload", {
+         method: "POST",
+         body: formData,
+       });
+ 
+       if (response.ok) {
+         const element2 = document.getElementById("takePhotoBtn");
+         const element3 = document.getElementById("switchCameraBtn");
+         element2.remove();
+         element3.remove();
+         const result = await response.json();
+         if (result.imageReceived) {
+           console.log(result);
+           let lightVector = result.result
+           let image = result.image
+           //const ele = document.getElementById('box');
+           //ele.appendChild(ar_module)
+           light.position.set(lightVector[0], lightVector[1], lightVector[2])
+
+           // const mensagem = document.createElement('div');
+           // mensagem.textContent = 'Imagem recebida com sucesso!';
+           // document.body.appendChild(mensagem);
+           //alert(result.result);
+         } else {
+           console.error("Erro no servidor:", result.error);
+         }
+       } else {
+         console.error("Falha ao enviar a imagem para o servidor.");
+       }
+     } catch (error) {
+       console.error("Erro na solicitação:", error);
+     }
+   } else {
+     console.error("O dado gerado não é uma imagem.");
+   }
+ });
+ 
+ 
