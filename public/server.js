@@ -15,12 +15,17 @@ app.use(express.static('public'));
 
 app.post('/upload', (req, res) => {
   const image = req.body.image;
-  //console.log(image)
-  //PythonShell.run('public/test2.py').then(messages=>{
-    // results is an array consisting of messages collected during execution
-    //console.log('results: %j', messages);
- //});
- console.log('Imagem processada!')
+  let options = {
+    mode: 'text',
+    pythonOptions: ['-u'],
+    scriptsPath: 'public/test2.py',
+    args: ['texto de exemplo']
+  }
+  console.log('Processando Imagem...')
+  PythonShell.run('public/test2.py', options).then(messages=>{
+      console.log('results: %j', messages);
+ });
+
   // resposta de sucesso
   const processResult = {
       result: [3, 3, -3],

@@ -7,9 +7,9 @@ import tensorflow as tf
 import imutils
 from skimage.metrics import structural_similarity as compare_ssim
 
-#image1 = sys.argv[1]
-#image2 = sys.argv[2]
-
+string = sys.argv[1]
+#string = sys.argv[2]
+print("Mensagem recebida: " + string)
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
