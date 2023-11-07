@@ -144,7 +144,7 @@ function setARStuff()
 }
 
 function photoOnCanvas() {
-   var strMime = "image/jpeg";
+   var strMime = "image.jpeg";
    let imgData = renderer.domElement.toDataURL(strMime);
    return imgData
  }
