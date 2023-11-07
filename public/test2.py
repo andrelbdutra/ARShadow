@@ -13,7 +13,7 @@ data = sys.argv[1]
 value = sys.argv[2]
 print("Valor recebido: " + value)
 
-response = urllib.request.urlopen(str(data))
+response = urllib.request.urlopen(data)
 with open('image.jpeg', 'wb') as f:
     f.write(response.file.read())
 
