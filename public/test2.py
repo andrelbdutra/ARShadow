@@ -14,7 +14,7 @@ value = sys.argv[2]
 print("Valor recebido: " + value)
 
 response = urllib.request.urlopen(data)
-with open('image.jpg', 'wb') as f:
+with open('image.jpeg', 'wb') as f:
     f.write(response.file.read())
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'

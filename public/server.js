@@ -7,13 +7,14 @@ const fs = require('fs');
 const app = express();
 const port = 3000;
 
-app.use(express.urlencoded({extended: true}));
-app.use(express.json());
+// app.use(express.urlencoded({extended: true}));
+// app.use(express.json());
 app.use(cors());
 
 // Configurar o Express para servir arquivos estáticos na pasta "public"
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser({limit: '500mb'}));
 app.use(bodyParser.json());
 
 app.post('/upload', (req, res) => {
@@ -22,7 +23,7 @@ app.post('/upload', (req, res) => {
     mode: 'text',
     pythonOptions: ['-u'],
     scriptsPath: 'public/test2.py',
-    args: [req.body.image, req.body.selectValue]
+    args: [JSON.stringify(req.body.image), req.body.selectValue]
   }
   console.log('Processando Imagem...')
   PythonShell.run('public/test2.py', options).then(messages=>{
