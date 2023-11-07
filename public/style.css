@@ -7,6 +7,14 @@ body {
 
 }
 
+.floating-select{
+    position: fixed;
+    left: 2%;
+    top: 2%;
+    width: 1000px;
+    height: 0px;
+}
+
 .floating-btn-take-photo {
     width: 80px;
     height: 80px;

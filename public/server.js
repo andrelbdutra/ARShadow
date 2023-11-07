@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const {PythonShell} = require('python-shell');
 const https = require('https');
 const cors = require('cors');
@@ -12,9 +13,11 @@ app.use(cors());
 
 // Configurar o Express para servir arquivos estáticos na pasta "public"
 app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.post('/upload', (req, res) => {
-  const image = req.body.image;
+  console.log("Teste: ", JSON.stringify(req.body));
   let options = {
     mode: 'text',
     pythonOptions: ['-u'],

@@ -150,16 +150,22 @@ function photoOnCanvas() {
  }
 
 document.getElementById("takePhotoBtn").addEventListener("click", async () => {
+   const select = document.getElementById("select");
+
+   let value = select.value;
+   console.log(value);
    const dataURL = photoOnCanvas();
    if (dataURL) {
      // const newWindow = window.open(); // abre imagem em outra aba
      // newWindow.document.write(`<img src="${dataURL}" />`);
      const formData = new FormData();
      formData.append("image", dataURL);
+
      try {
        const response = await fetch("/upload", {
          method: "POST",
-         body: formData,
+         body: JSON.stringify({ image: dataURL, selectValue: value}),
+         headers: new Headers({ 'Content-Type': 'application/json'})
        });
  
        if (response.ok) {
@@ -167,6 +173,7 @@ document.getElementById("takePhotoBtn").addEventListener("click", async () => {
          const element3 = document.getElementById("switchCameraBtn");
          element2.remove();
          element3.remove();
+         select.remove();
          const result = await response.json();
          if (result.imageReceived) {
            console.log(result);
