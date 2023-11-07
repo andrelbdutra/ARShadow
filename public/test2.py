@@ -5,11 +5,17 @@ import cv2 as cv
 import numpy as np
 import tensorflow as tf
 import imutils
+from binascii import a2b_base64
+import urllib
 from skimage.metrics import structural_similarity as compare_ssim
 
-string = sys.argv[1]
-#string = sys.argv[2]
-print("Mensagem recebida: " + string)
+data = sys.argv[1]
+value = sys.argv[2]
+print("Valor recebido: " + value)
+
+response = urllib.request.urlopen(data)
+with open('image.jpg', 'wb') as f:
+    f.write(response.file.read())
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'

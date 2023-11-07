@@ -17,12 +17,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.post('/upload', (req, res) => {
-  console.log("Teste: ", JSON.stringify(req.body));
+  console.log("Teste: ", req.body);
   let options = {
     mode: 'text',
     pythonOptions: ['-u'],
     scriptsPath: 'public/test2.py',
-    args: ['texto de exemplo']
+    args: [req.body.image, req.body.selectValue]
   }
   console.log('Processando Imagem...')
   PythonShell.run('public/test2.py', options).then(messages=>{
