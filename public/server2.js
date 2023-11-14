@@ -61,7 +61,6 @@ app.get("/threejs", (req, res) => {
 
 app.post("/threejs", (req, res) =>
 {
-	console.log('teste')
 	initialize(req.body.scene);
 	var contour = fs.readFileSync(__dirname + "/my-images/contour.txt", "utf8").split(" ");
 	var result = beginMethod(contour, 10, 65, 129, 6, preset, 4);
