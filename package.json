@@ -8,7 +8,8 @@
     "start": "node public/server.js",
     "startNodemon": "nodemon public/server.js",
     "devLinux": "npm install && python3 -m pip3 -r requirementes.txt",
-    "devWindows": "npm install && pip install -r requirements.txt"
+    "devWindows": "npm install && pip install -r requirements.txt",
+    "testServer": "nodemon public/server2.js"
   },
   "repository": {
     "type": "git",
@@ -22,11 +23,16 @@
   "homepage": "https://github.com/andrelbdutra/ARShadow#readme",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "canvas": "^2.11.2",
+    "ejs": "^3.1.9",
     "bootstrap": "^5.3.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "nodemon": "^3.0.1",
     "python-shell": "^5.0.0",
-    "three": "^0.157.0"
+    "fs": "^0.0.1-security",
+    "gl": "^6.0.2",
+    "three": "^0.158.0",
+    "three-canvas-renderer": "^2.0.0"
   }
 }
