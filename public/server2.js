@@ -1,8 +1,10 @@
-//const http = require("http");
+const https = require('https');
+const spawn = require("child_process").spawn;
 const THREE = require("three-canvas-renderer");
 const express = require("express");
+const cors = require("cors");
 const bodyParser = require("body-parser");
-const https = require('https');
+//const multer = require("multer");
 const fs = require("fs");
 const gl = require("gl");
 const {createCanvas, loadImage} = require("canvas");
@@ -15,25 +17,24 @@ var preset, done = false;
 var rendW, rendH, renderer, output;
 var vObjHeight, vObjRatio, planeSize;
 
-
-const hostname = "127.0.0.1";
 const port = 3000;
 
 var options = {
 	index: "index.html"
 }
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({limit: "1mb", extended: true}));
 app.engine("html", require("ejs").renderFile);
 app.use(express.static('public'));
+app.use(cors({origin: "*", optionsSuccessStatus: 200}));
 
-
+const host = "0.0.0.0";
 const openSSL = {
     key: fs.readFileSync('./ssl/key.pem'),
     cert: fs.readFileSync('./ssl/cert.pem')
   };
 const server = https.createServer(openSSL, app);
-server.listen(port, () => {
+server.listen(port, host, () => {
     const os = require('os');
     const networkInterfaces = os.networkInterfaces();
     let ipAddress;
@@ -52,44 +53,46 @@ server.listen(port, () => {
     console.log(`Servidor rodando em https://${ipAddress}:${port}`);
 });
 
-
-/*
-app.get("/threejs", (req, res) => {
-	res.render(__dirname + "/threejs/ar-app.html", {output: "0 0 0"});
-});
-*/
-
 app.post("/threejs", (req, res) =>
 {
+	console.log("received request");
 	initialize(req.body.scene);
-	var contour = fs.readFileSync(__dirname + "/my-images/contour.txt", "utf8").split(" ");
-	var result = beginMethod(contour, 10, 65, 129, 6, preset, 4);
-	console.log(result);
-	res.send(result);
+	fs.writeFileSync(__dirname + "/arshadowgan/data/noshadow/01.jpg", Buffer.from(req.body.img.replace(/^data:image\/\w+;base64,/, ""), "base64"));
+	fs.writeFileSync(__dirname + "/arshadowgan/data/mask/01.jpg", Buffer.from(req.body.mask.replace(/^data:image\/\w+;base64,/, ""), "base64"));
+	console.log("started python");
+	py = spawn("python", ["-u", __dirname + "/arshadowgan/test2.py"]);
+	py.stdout.on("data", (data) =>
+	{
+		console.log("got python output");
+		data = data.toString();
+		var contour = data.split(" ");
+		console.log(contour);
+		if (isNaN(contour[0]))
+			res.send("0 1 0");
+		else
+		{
+			var result = "0 1 0";
+			switch (preset)
+			{
+				case 1:
+					console.log("method 1");
+					result = beginMethod(true, contour, 10, 33, 65, 22, 1, 3);
+					break;
+
+				case 2:
+					console.log("method 2");
+					result = beginMethod(true, contour, 10, 33, 65, 22, 2, 3);
+					break;
+
+				default:
+					console.log("method 0");
+					result = beginMethod(true, contour, 10, 33, 65, 22, 0, 3);
+			}
+			res.end(result);
+		}
+	});
 });
 
-app.post('/upload', (req, res) => {
-	console.log("Teste: ", req.body);
-	let options = {
-	  mode: 'text',
-	  pythonOptions: ['-u'],
-	  scriptsPath: 'public/test2.py',
-	  args: [req.body.image, req.body.selectValue]
-	}
-	console.log('Processando Imagem...')
-	PythonShell.run('public/test2.py', options).then(messages=>{
-		console.log('results: %j', messages);
-   });
-  
-	// resposta de sucesso
-	const processResult = {
-		result: [3, 3, -3],
-		image: 'assets/images/imagem1.png',
-		imageReceived: true, 
-	  };
-	  
-	  res.json(processResult);
-	});
 
 function combine3(list)
 {
@@ -255,7 +258,7 @@ function getMidPoints(p, t, r) // p: pontos, t: tolerancia, r: recursoes
 }
 
 
-function beginMethod(list, threshold, rho, theta, alpha, recMax, subMax)
+function beginMethod(div, list, threshold, rho, theta, alpha, recMax, subMax)
 {
 	var startTime = performance.now();
 
@@ -354,7 +357,7 @@ function beginMethod(list, threshold, rho, theta, alpha, recMax, subMax)
 
 		var v5 = v3[k][2].clone().sub(v3[k][1]).normalize();
 		alpha *= Math.PI / 180;
-		result = mainMethod(mask, mv, v5.normalize(), v3[k][1], alpha, alpha, v3.length, rho, theta, subMax, recMax);
+		result = mainMethod(div, mask, mv, v5.normalize(), v3[k][1], alpha, alpha, v3.length, rho, theta, subMax, recMax);
 	}
 	else
 	{
@@ -374,10 +377,9 @@ function beginMethod(list, threshold, rho, theta, alpha, recMax, subMax)
 }
 
 
-function mainMethod(mask, mv, initialVector, objectPosition, alpha, opAlpha, v3len, rho = 257, theta = 257, subMax = 1, recMax = 1, depth = 1)
+function mainMethod(div, mask, mv, initialVector, objectPosition, alpha, opAlpha, v3len, rho = 257, theta = 257, subMax = 1, recMax = 1, depth = 1)
 {
 	var v5 = initialVector.normalize();
-
 	// cria o mapa
 	var ni = rho;
 	var nj = theta;
@@ -407,32 +409,26 @@ function mainMethod(mask, mv, initialVector, objectPosition, alpha, opAlpha, v3l
 		}
 	}
 
-	// calcula a imagem integral
-	vl[0][0][4] = vl[0][0][1];
-	for (var i = 1; i < vl[0].length; i++)
-		vl[0][i][4] = vl[0][i - 1][4] + vl[0][i][1];
-	for (var i = 1; i < vl.length; i++)
-	{
-		vl[i][0][4] = vl[i - 1][0][4] + vl[i][0][1];
-		for (var j = 1; j < vl[i].length; j++)
-			vl[i][j][4] = vl[i][j][1] + vl[i][j - 1][4] + vl[i - 1][j][4] - vl[i - 1][j - 1][4];
-	}
-
-	// encontra o melhor ponto da calota esferica
-	var div = false;
-	var res = searchWithinCap(div, mv, mask, subMax, vl, si, sj, ni, nj, objectPosition, v5, depth, recMax, alpha, opAlpha, alpha);
-	var v6 = res[0].clone().multiplyScalar(5).add(objectPosition);
-
-	var newAlpha = alpha * 0.71167 / Math.pow(2, res[5]); // Math.sqrt(Math.pow(1 - Math.sqrt(Math.PI) / 4, 2) + Math.PI / 16) / tamanho_da_secao
-	console.log("new alpha:", newAlpha * 180 / Math.PI);
 	if (depth < recMax)
-		mainMethod(mask, mv, res[0].clone(), objectPosition, newAlpha, opAlpha, v3len, rho, theta, subMax, recMax, depth + 1);
-	else
 	{
-		var str = "";
-		console.log("IoU: 0," + getRenderValue(objectPosition, res[0].clone().multiplyScalar(5).add(objectPosition), mask).toFixed(5).substring(2));
-		return res[0].x.toString() + " " + res[0].y.toString() + " " + res[0].z.toString();
+		// calcula a imagem integral
+		vl[0][0][4] = vl[0][0][1];
+		for (var i = 1; i < vl[0].length; i++)
+			vl[0][i][4] = vl[0][i - 1][4] + vl[0][i][1];
+		for (var i = 1; i < vl.length; i++)
+		{
+			vl[i][0][4] = vl[i - 1][0][4] + vl[i][0][1];
+			for (var j = 1; j < vl[i].length; j++)
+				vl[i][j][4] = vl[i][j][1] + vl[i][j - 1][4] + vl[i - 1][j][4] - vl[i - 1][j - 1][4];
+		}
+		// encontra o melhor ponto da calota esferica
+		var res = searchWithinCap(div, mv, mask, subMax, vl, si, sj, ni, nj, objectPosition, v5, debug, depth, recMax, alpha, opAlpha, alpha);
+
+		var newAlpha = res[6];
+		return mainMethod(div, mask, mv, groundTruth, res[0].clone(), objectPosition, newAlpha, opAlpha, debug, v3len, rho, theta, subMax, recMax, depth + 1);
 	}
+	else
+		return maxVec.x.toString() + " " + maxVec.y.toString() + " " + maxVec.z.toString();
 }
 
 
@@ -444,10 +440,10 @@ function searchWithinCap(extra, best, mask, subMax, map, ii, jj, ni, nj, ori, v0
 	if (depth == 1)
 	{
 		var axis = new THREE.Vector3(0, 1, 0).cross(v0).normalize();
-		for (var i = 0; i < 8; i++)
+		for (var i = 0; i < (extra ? 8 : 4); i++)
 		{
 			p.push(p0.clone().applyAxisAngle(axis, alpha / 2));
-			p[i].applyAxisAngle(v0, i * Math.PI / 2 + Math.PI / (extra ? 8 : 4));
+			p[i].applyAxisAngle(v0, i * Math.PI / (extra ? 4 : 2) + Math.PI / 4);
 		}
 	}
 	else
@@ -472,6 +468,10 @@ function searchWithinCap(extra, best, mask, subMax, map, ii, jj, ni, nj, ori, v0
 			p[7].applyAxisAngle(axis,  alpha / 2);
 		}
 	}
+	var dist = [];
+	for (var i = 0; i < (extra ? 8 : 4); i++)
+		dist.push(p0.angleTo(p[i]));
+	var distMax = Math.max(dist[0], dist[1], dist[2], dist[3]);
 
 	var list = [];
 	var res = [];
@@ -650,7 +650,7 @@ function searchWithinCap(extra, best, mask, subMax, map, ii, jj, ni, nj, ori, v0
 				}
 			}
 		}
-		list.push([p[i], val * lMax / area, i, ar, at, mr, mt, r0f, r1f, t0f, t1f]);
+		list.push([p[i], val / area, i, ar, at, mr, mt, r0f, r1f, t0f, t1f]);
 	}
 	list.sort(function(a, b)
 	{
@@ -680,13 +680,7 @@ function searchWithinCap(extra, best, mask, subMax, map, ii, jj, ni, nj, ori, v0
 //	path.push([parseInt(list[0][3]), parseInt(list[0][4]), parseInt(list[0][5]), parseInt(list[0][6]), depth]);
 
 	if (depth >= subMax)// || prev > res[list[0][1]]) // se nao houver candidato melhor que o anterior
-	{
-		return [list[0][0], list[0][3], list[0][4], path, list[0][1], depth - 1];
-		if (res[list[0][1]] > best) // se o melhor candidato for melhor que o inicial
-			return [(depth >= subMax ? list[0][0] : p0), list[0][3], list[0][4], path, list[0][1], depth - 1];
-		else
-			return [v0, 0, 0, [], 0, depth - 1];
-	}
+		return [list[0][0], list[0][3], list[0][4], path, list[0][1], depth - 1, distMax];
 	else
 		return searchWithinCap(extra, best, mask, subMax, map, ii, jj, ni, nj, ori, v0, rec, maxRec, opAlpha, ogAlpha, alpha / 2, beta / 2, theta, list[0][0], res[list[0][2]], depth + 1, path);
 }

@@ -76,13 +76,8 @@ function initialize()
 	 *********************************************************************************************/
 
 	arToolkitSource = new THREEx.ArToolkitSource({
-		//sourceType: 'webcam'
-//		sourceType: 'image', sourceUrl: 'my-images/index.jpeg',
-		sourceType: 'image', sourceUrl: 'my-images/frame.jpg',
-//		sourceWidth: 640,
-//		sourceHeight: 480,
-//		displayWidth: 640,
-//		displayHeight: 640
+		sourceType: "webcam",
+		//sourceType: "image", sourceUrl: "my-images/frame.jpg",
 	});
 
 	arToolkitSource.init(function onReady(){
@@ -227,25 +222,75 @@ function initialize()
 	light.target = emptyObj;
 }
 
-document.getElementById("submitButtonInput").addEventListener("click", async () => {
 
+document.getElementById("submitButtonInput").addEventListener("click", async () => {
+	const select = document.getElementById("select");
+	let value = select.value;
+	const element2 = document.getElementById("submitButton");
+	const element3 = document.getElementById("switchCameraBtn");
 	var $form = $("#submitButton");
-	var value = "";
+	var params = "";
 	var inv = camera.projectionMatrix.clone();
 	inv.getInverse(inv);
 
 	for (var i = 0; i < 16; i++)
-		value += " " + scene.matrix.elements[i];
+		params += scene.matrix.elements[i] + " ";
 	for (var i = 0; i < 16; i++)
-		value += " " + camera.projectionMatrix.elements[i];
+		params += camera.projectionMatrix.elements[i] + " ";
 	for (var i = 0; i < 16; i++)
-		value += " " + inv.elements[i];
-	value += " " + renderer.domElement.clientWidth.toString();
-	value += " " + renderer.domElement.clientHeight.toString();
-	value += " 0"; // preset, pode ser alterado eventualmente, valores mais altos geram resultados mais precisos porem mais lentos. precisa ser int >= 0 e precisa ter um espaco em branco na frente
+		params += inv.elements[i] + " ";
+	params += renderer.domElement.clientWidth.toString() + " ";
+	params += renderer.domElement.clientHeight.toString() + " ";
+	params += value; // preset, pode ser alterado eventualmente. pode ser 0, 1 ou 2
 
+	var vw, vh;
+	if (arToolkitSource.parameters.sourceType == "webcam")
+	{
+		vw = arToolkitSource.domElement.videoWidth;
+		vh = arToolkitSource.domElement.videoHeight;
+	}
+	else
+	{
+		vw = arToolkitSource.domElement.naturalWidth;
+		vh = arToolkitSource.domElement.naturalHeight;
+	}
+	var w   = renderer.domElement.width;
+	var h   = renderer.domElement.height;
+	var cw  = renderer.domElement.clientWidth;
+	var ch  = renderer.domElement.clientHeight;
+	var pw  = (cw > ch) ? Math.floor((cw - ch) / 2.0) : 0;
+	var ph  = (ch > cw) ? Math.floor((ch - cw) / 2.0) : 0;
+	var pvw = (vw > vh) ? Math.floor((vw - vh) / 2.0) : 0;
+	var pvh = (vh > vw) ? Math.floor((vh - vw) / 2.0) : 0;
+	var canvas = document.createElement("canvas");
+	var client = document.createElement("canvas");
+	canvas.width  = 256;
+	canvas.height = 256;
+	client.width  = cw;
+	client.height = ch;
+	var ctx = canvas.getContext("2d");
+	var aux = client.getContext("2d");
+	ctx.drawImage(arToolkitSource.domElement, pvw, pvh, vw - pvw * 2, vh - pvh * 2, 0, 0, 256, 256);
+	aux.drawImage(renderer.domElement, 0, 0, w, h, 0, 0, cw, ch);
+	ctx.drawImage(client, pw, ph, cw - pw * 2, ch - ph * 2, 0, 0, 256, 256);
+	var img = canvas.toDataURL("image/jpeg");
+	ctx.clearRect(0, 0, 256, 256);
+	ctx.drawImage(client, pw, ph, cw - pw * 2, ch - ph * 2, 0, 0, 256, 256);
+	var data = ctx.getImageData(0, 0, 256, 256);
+	for (var i = 0; i < 256 * 256 * 4; i += 4)
+	{
+		if (data.data[i] > 0 || data.data[i + 1] > 0 || data.data[i + 2] > 0)
+		{
+			data.data[i]     = 255;
+			data.data[i + 1] = 255;
+			data.data[i + 2] = 255;
+		}
+		data.data[i + 3] = 255;
+	}
+	ctx.putImageData(data, 0, 0);
+	var mask = canvas.toDataURL("image/jpeg");
 	var url = $form.attr("action");
-	var posting = $.post(url, {scene: value.substring(1)});
+	var posting = $.post(url, {scene: params, img: img, mask: mask});
 	posting.done(function(data)
 	{
 		data = data.split(" ");
@@ -255,6 +300,9 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 		console.log(v);
 		light.position.set(v.x, v.y, v.z);
 	});
+	element2.remove();
+	element3.remove();
+	select.remove();
 })
 
 
