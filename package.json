@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node public/server.js",
     "startNodemon": "nodemon public/server.js",
-    "devLinux": "npm install && python3 -m pip3 -r requirementes.txt",
+    "devLinux": "npm install && python3 -m pip3 -r requirements.txt",
     "devWindows": "npm install && pip install -r requirements.txt",
     "testServer": "nodemon public/server2.js"
   },
