@@ -30,6 +30,18 @@ function onResize()
 	}
 }
 
+function setSource(type, url)
+{
+   if(arToolkitSource) arToolkitSource = null
+
+   arToolkitSource = new THREEx.ArToolkitSource({	
+	   sourceType : type,
+	  sourceUrl : url,
+   })
+   arToolkitSource.init(function onReady(){
+	   onResize()    
+   })
+}
 
 function initialize()
 {
@@ -77,18 +89,16 @@ function initialize()
 
 	arToolkitSource = new THREEx.ArToolkitSource({
 		sourceType: "webcam",
-		//sourceType: "image", sourceUrl: "my-images/frame.jpg",
+		//sourceType: "video", sourceUrl: "my-videos/video5.MOV",
+		//sourceType: "image", sourceUrl: "my-images/frame2.jpg",
 	});
-
-	arToolkitSource.init(function onReady(){
-		onResize()
-	});
-
+	
+	
 	// handle resize event
 	window.addEventListener('resize', function(){
 		onResize()
 	});
-
+	
 	// create atToolkitContext
 	arToolkitContext = new THREEx.ArToolkitContext({
 		cameraParametersUrl: 'data/camera_para.dat',
@@ -101,7 +111,11 @@ function initialize()
 		//camera.aspect = 1.0;
 		//camera.updateProjectionMatrix();
 	});
-
+	
+	//setSource("webcam", null)
+	arToolkitSource.init(function onReady(){
+		onResize()
+	});
 
 	/**********************************************************************************************
 	 *
@@ -112,7 +126,7 @@ function initialize()
 	var wood = new THREE.MeshPhongMaterial({map: loader.load("my-textures/face/wood.png")});
 
 	var shadowMat = new THREE.ShadowMaterial({
-		opacity: 1.00,
+		opacity: 0.75,
 		side: THREE.DoubleSide,
 	});
 
@@ -149,8 +163,8 @@ function initialize()
 	origLight.shadow.camera.top    =  d;
 	origLight.shadow.camera.bottom = -d;
 
-	origLight.shadow.mapSize.width  = 4096;
-	origLight.shadow.mapSize.height = 4096;
+	origLight.shadow.mapSize.width  = 8192;
+	origLight.shadow.mapSize.height = 8192;
 
 	light = origLight.clone();
 
@@ -222,12 +236,37 @@ function initialize()
 	light.target = emptyObj;
 }
 
+var selectValue = "0";
+
+document.getElementById("select2").addEventListener("click", async () => {
+	const select = document.getElementById("select2");
+	let value = select.value;
+	if(selectValue != value) {
+		selectValue = value;
+		console.log("select2 clicked");
+		switch (value)
+        {
+        	case '0':
+              	setSource('webcam',null)
+              	break;
+        	case '1':
+              	setSource('image','my-images/frame.jpg')         
+              	break;
+        	case '2':
+              	setSource('image', 'my-images/frame2.jpg')                     
+              	break;
+			case '3':
+				setSource('image','my-images/foto1.png')         
+				break;
+        }
+	}
+})
 
 document.getElementById("submitButtonInput").addEventListener("click", async () => {
 	const select = document.getElementById("select");
 	let value = select.value;
 	const element2 = document.getElementById("submitButton");
-	const element3 = document.getElementById("switchCameraBtn");
+	const element3 = document.getElementById("select2");
 	var $form = $("#submitButton");
 	var params = "";
 	var inv = camera.projectionMatrix.clone();
@@ -244,7 +283,7 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	params += value; // preset, pode ser alterado eventualmente. pode ser 0, 1 ou 2
 
 	var vw, vh;
-	if (arToolkitSource.parameters.sourceType == "webcam")
+	if (arToolkitSource.parameters.sourceType == "webcam" || arToolkitSource.parameters.sourceType == "video")
 	{
 		vw = arToolkitSource.domElement.videoWidth;
 		vh = arToolkitSource.domElement.videoHeight;
@@ -290,15 +329,40 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	ctx.putImageData(data, 0, 0);
 	var mask = canvas.toDataURL("image/jpeg");
 	var url = $form.attr("action");
+	const start = performance.now();
 	var posting = $.post(url, {scene: params, img: img, mask: mask});
 	posting.done(function(data)
 	{
+		const end = performance.now();
+		const tempoDecorridoMs = end - start;
+		const horas = Math.floor(tempoDecorridoMs / (1000 * 60 * 60));
+		const minutos = Math.floor((tempoDecorridoMs % (1000 * 60 * 60)) / (1000 * 60));
+		const segundos = Math.floor((tempoDecorridoMs % (1000 * 60)) / 1000);
+		const milissegundos = Math.floor(tempoDecorridoMs % 1000);
+		
+		console.log(`Tempo de processamento: ${horas}h:${minutos}m:${segundos}s:${milissegundos}ms`);
+	  
 		data = data.split(" ");
 		var v = new THREE.Vector3(parseFloat(data[0]), parseFloat(data[1]), parseFloat(data[2]));
 		v.multiplyScalar(5);
 		v.add(vObj.position.clone());
 		console.log(v);
 		light.position.set(v.x, v.y, v.z);
+		switch (selectValue)
+        {
+        	case '0':
+              	//setSource('webcam',null)
+              	break;
+        	case '1':
+              	//setSource('image','my-images/foto1.png')         
+              	break;
+        	case '2':
+              	//setSource('image', 'my-images/frame2.jpg')                     
+              	break;
+			case '3':
+				setSource("video", "my-videos/video4.MOV")                                   
+			  	break;
+        }
 	});
 	element2.remove();
 	element3.remove();

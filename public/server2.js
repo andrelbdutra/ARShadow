@@ -55,6 +55,7 @@ server.listen(port, host, () => {
 
 app.post("/threejs", (req, res) =>
 {
+	const start = performance.now();
 	//console.log("received request");
 	initialize(req.body.scene);
 	fs.writeFileSync(__dirname + "/arshadowgan/data/noshadow/01.jpg", Buffer.from(req.body.img.replace(/^data:image\/\w+;base64,/, ""), "base64"));
@@ -85,6 +86,14 @@ app.post("/threejs", (req, res) =>
 				default:
 					result = beginMethod(true, contour, 10, 33, 65, 22, 0, 3);
 			}
+			const end = performance.now();
+			const tempoDecorridoMs = end - start;
+			const horas = Math.floor(tempoDecorridoMs / (1000 * 60 * 60));
+			const minutos = Math.floor((tempoDecorridoMs % (1000 * 60 * 60)) / (1000 * 60));
+			const segundos = Math.floor((tempoDecorridoMs % (1000 * 60)) / 1000);
+			const milissegundos = Math.floor(tempoDecorridoMs % 1000);
+			
+			console.log(`Tempo de processamento: ${horas}h:${minutos}m:${segundos}s:${milissegundos}ms`);
 			res.end(result);
 		}
 	});
