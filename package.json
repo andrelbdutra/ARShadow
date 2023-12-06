@@ -5,7 +5,7 @@
   "main": "public/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon public/server2.js",
+    "start": "nodemon public/server.js",
     "startNodemon": "nodemon public/server.js",
     "postinstall": "pip3 install -r requirements.txt"
   },
