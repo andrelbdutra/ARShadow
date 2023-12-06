@@ -1,5 +1,8 @@
 const https = require('https');
+const { performance } = require('perf_hooks');
 const spawn = require("child_process").spawn;
+const { exec } = require('child_process');
+const { promisify } = require('util');
 const THREE = require("three-canvas-renderer");
 const express = require("express");
 const cors = require("cors");
@@ -8,6 +11,7 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 const gl = require("gl");
 const {createCanvas, loadImage} = require("canvas");
+const execPromise = promisify(exec);
 const app = express();
 
 var camera, mainScene, scene;
@@ -53,50 +57,83 @@ server.listen(port, host, () => {
     console.log(`Servidor rodando em https://${ipAddress}:${port}`);
 });
 
-app.post("/threejs", (req, res) =>
+async function verificarPython() {
+  try {
+    await execPromise('python3 --version');
+    return 'python3';
+  } catch (errorPython3) {
+    try {
+      await execPromise('python --version');
+      return 'python';
+    } catch (errorPython2) {
+      throw new Error('Python não encontrado no sistema.');
+    }
+  }
+}
+
+app.post("/threejs", async (req, res) =>
 {
 	const start = performance.now();
-	//console.log("received request");
+	console.log("received request");
 	initialize(req.body.scene);
 	fs.writeFileSync(__dirname + "/arshadowgan/data/noshadow/01.jpg", Buffer.from(req.body.img.replace(/^data:image\/\w+;base64,/, ""), "base64"));
 	fs.writeFileSync(__dirname + "/arshadowgan/data/mask/01.jpg", Buffer.from(req.body.mask.replace(/^data:image\/\w+;base64,/, ""), "base64"));
 	//console.log("started python");
-	py = spawn("python", ["-u", __dirname + "/arshadowgan/test2.py"]);
-	py.stdout.on("data", (data) =>
-	{
-		//console.log("got python output");
-		data = data.toString();
-		var contour = data.split(" ");
-		//console.log(contour);
-		if (isNaN(contour[0]))
-			res.send("0 1 0");
-		else
+	
+	try {
+		const comando = await verificarPython();
+		const { spawn } = require('child_process');
+		const py = spawn(comando, ['-u', __dirname + '/arshadowgan/test2.py']);
+	
+		py.stdout.on("data", (data) =>
 		{
-			var result = "0 1 0";
-			switch (preset)
+			//console.log("got python output");
+			data = data.toString();
+			var contour = data.split(" ");
+			//console.log(contour);
+			if (isNaN(contour[0]))
+				res.send("0 1 0");
+			else
 			{
-				case 1:
-					result = beginMethod(true, contour, 10, 33, 65, 22, 1, 3);
-					break;
+				var result = "0 1 0";
+				switch (preset)
+				{
+					case 1:
+						result = beginMethod(true, contour, 10, 33, 65, 22, 1, 3);
+						break;
 
-				case 2:
-					result = beginMethod(true, contour, 10, 33, 65, 22, 2, 3);
-					break;
+					case 2:
+						result = beginMethod(true, contour, 10, 33, 65, 22, 2, 3);
+						break;
 
-				default:
-					result = beginMethod(true, contour, 10, 33, 65, 22, 0, 3);
+					default:
+						result = beginMethod(true, contour, 10, 33, 65, 22, 0, 3);
+				}
+				const end = performance.now();
+				const tempoDecorridoMs = end - start;
+				const horas = Math.floor(tempoDecorridoMs / (1000 * 60 * 60));
+				const minutos = Math.floor((tempoDecorridoMs % (1000 * 60 * 60)) / (1000 * 60));
+				const segundos = Math.floor((tempoDecorridoMs % (1000 * 60)) / 1000);
+				const milissegundos = Math.floor(tempoDecorridoMs % 1000);
+				
+				console.log(`Tempo de processamento: ${horas}h:${minutos}m:${segundos}s:${milissegundos}ms`);
+				res.end(result);
 			}
-			const end = performance.now();
-			const tempoDecorridoMs = end - start;
-			const horas = Math.floor(tempoDecorridoMs / (1000 * 60 * 60));
-			const minutos = Math.floor((tempoDecorridoMs % (1000 * 60 * 60)) / (1000 * 60));
-			const segundos = Math.floor((tempoDecorridoMs % (1000 * 60)) / 1000);
-			const milissegundos = Math.floor(tempoDecorridoMs % 1000);
-			
-			console.log(`Tempo de processamento: ${horas}h:${minutos}m:${segundos}s:${milissegundos}ms`);
-			res.end(result);
-		}
-	});
+		});
+	
+		py.stdout.on('data', (data) => {
+		  //console.log(`Saída do processo Python: ${data}`);
+		});
+	
+		py.stderr.on('data', (data) => {
+		  console.error(`Erro do processo Python: ${data}`);
+		});
+	
+		// Resto do seu código que aguarda a finalização do processo Python aqui
+	} catch (error) {
+		console.error(error.message);
+		res.status(500).send('Erro ao executar Python.');
+	}
 });
 
 

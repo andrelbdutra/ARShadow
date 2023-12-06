@@ -243,7 +243,6 @@ document.getElementById("select2").addEventListener("click", async () => {
 	let value = select.value;
 	if(selectValue != value) {
 		selectValue = value;
-		console.log("select2 clicked");
 		switch (value)
         {
         	case '0':
