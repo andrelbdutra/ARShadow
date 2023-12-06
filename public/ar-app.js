@@ -163,8 +163,8 @@ function initialize()
 	origLight.shadow.camera.top    =  d;
 	origLight.shadow.camera.bottom = -d;
 
-	origLight.shadow.mapSize.width  = 8192;
-	origLight.shadow.mapSize.height = 8192;
+	origLight.shadow.mapSize.width  = 4096;
+	origLight.shadow.mapSize.height = 4096;
 
 	light = origLight.clone();
 
