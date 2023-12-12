@@ -26,6 +26,7 @@ const returnBtn = document.getElementById("returnButton");
 returnBtn.style.display = "none";
 const select2 = document.getElementById("select2");
 loaderElement.style.display = "none";
+var returnFlag = false;
 
 initialize();
 animate();
@@ -274,8 +275,6 @@ document.getElementById("select2").addEventListener("click", async () => {
 
 returnBtn.addEventListener('click', async () => {
 	let value = select2.value;
-	if(selectValue != value) {
-		selectValue = value;
 		switch (value)
         {
         	case '0':
@@ -288,16 +287,15 @@ returnBtn.addEventListener('click', async () => {
               	setSource('image', 'my-images/frame2.jpg')                     
               	break;
 			case '3':
+				console.log('entrou 3')	
 				setSource('image','my-images/foto1.png')         
 				break;
         }
-	}
 	select.style.display = "block";
 	select2.style.display = "block";
 	submitBtn.style.display = "block";
 	returnBtn.style.display = "none";
 	light.position.set(0, 10, 0);
-
 });
 
 document.getElementById("submitButtonInput").addEventListener("click", async () => {
@@ -399,7 +397,9 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
               	//setSource('image', 'my-images/frame2.jpg')                     
               	break;
 			case '3':
-				setSource("video", "my-videos/video4.MOV")                                   
+				returnFlag = true;
+				setSource("video", "my-videos/video4.MOV")    
+
 			  	break;
         }
 	});
