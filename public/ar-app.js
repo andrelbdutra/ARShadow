@@ -406,6 +406,10 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	submitBtn.style.display = "none";
 	select.style.display = "none";
 	select2.style.display = "none";
+	posting.fail(function() {
+		returnBtn.style.display = "block";
+		loaderElement.style.display = "none";
+	})
 })
 
 
