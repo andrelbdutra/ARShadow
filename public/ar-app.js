@@ -16,6 +16,17 @@ var adjustX        =   0.00;
 var adjustZ        =   0.00;
 var done           =  false;
 
+const loaderElement = document.createElement("div");
+loaderElement.setAttribute("class", "loader");	
+loaderElement.setAttribute("id", "loader");
+document.body.appendChild(loaderElement);
+const select = document.getElementById("select");
+const submitBtn = document.getElementById("submitButton");
+const returnBtn = document.getElementById("returnButton");
+returnBtn.style.display = "none";
+const select2 = document.getElementById("select2");
+loaderElement.style.display = "none";
+
 initialize();
 animate();
 
@@ -261,11 +272,38 @@ document.getElementById("select2").addEventListener("click", async () => {
 	}
 })
 
+returnBtn.addEventListener('click', async () => {
+	let value = select2.value;
+	if(selectValue != value) {
+		selectValue = value;
+		switch (value)
+        {
+        	case '0':
+              	setSource('webcam',null)
+              	break;
+        	case '1':
+              	setSource('image','my-images/frame.jpg')         
+              	break;
+        	case '2':
+              	setSource('image', 'my-images/frame2.jpg')                     
+              	break;
+			case '3':
+				setSource('image','my-images/foto1.png')         
+				break;
+        }
+	}
+	select.style.display = "block";
+	select2.style.display = "block";
+	submitBtn.style.display = "block";
+	returnBtn.style.display = "none";
+	light.position.set(0, 10, 0);
+
+});
+
 document.getElementById("submitButtonInput").addEventListener("click", async () => {
-	const select = document.getElementById("select");
 	let value = select.value;
-	const element2 = document.getElementById("submitButton");
-	const element3 = document.getElementById("select2");
+	loaderElement.style.display = "block";
+
 	var $form = $("#submitButton");
 	var params = "";
 	var inv = camera.projectionMatrix.clone();
@@ -332,6 +370,8 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	var posting = $.post(url, {scene: params, img: img, mask: mask});
 	posting.done(function(data)
 	{
+		returnBtn.style.display = "block";
+		loaderElement.style.display = "none";
 		const end = performance.now();
 		const tempoDecorridoMs = end - start;
 		const horas = Math.floor(tempoDecorridoMs / (1000 * 60 * 60));
@@ -363,9 +403,9 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 			  	break;
         }
 	});
-	element2.remove();
-	element3.remove();
-	select.remove();
+	submitBtn.style.display = "none";
+	select.style.display = "none";
+	select2.style.display = "none";
 })
 
 

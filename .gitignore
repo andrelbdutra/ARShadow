@@ -3,3 +3,5 @@ public/output
 public/model/model.pb
 public/arshadowgan/model/model.pb
 public/arshadowgan/output
+public/arshadowgan/data/mask/01.jpg
+public/arshadowgan/data/noshadow/01.jpg
