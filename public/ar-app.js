@@ -26,7 +26,6 @@ const returnBtn = document.getElementById("returnButton");
 returnBtn.style.display = "none";
 const select2 = document.getElementById("select2");
 loaderElement.style.display = "none";
-var returnFlag = false;
 
 initialize();
 animate();
@@ -397,7 +396,6 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
               	//setSource('image', 'my-images/frame2.jpg')                     
               	break;
 			case '3':
-				returnFlag = true;
 				setSource("video", "my-videos/video4.MOV")    
 
 			  	break;
@@ -406,9 +404,11 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	submitBtn.style.display = "none";
 	select.style.display = "none";
 	select2.style.display = "none";
-	posting.fail(function() {
+
+	posting.fail(function(response) {
 		returnBtn.style.display = "block";
 		loaderElement.style.display = "none";
+		alert('Error: ' + response.responseText);
 	})
 })
 
