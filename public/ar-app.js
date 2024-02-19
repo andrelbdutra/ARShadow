@@ -10,8 +10,8 @@ var loader = new THREE.TextureLoader();
 var planeSize      = 150.00;
 var sPlaneSize     =  15.00;
 var sPlaneSegments = 300.00;
-var vObjHeight     =   1.20;
-var vObjRatio      =   1.00;
+var vObjHeight     =   1.25;
+var vObjRatio      =   1.75;
 var adjustX        =   0.00;
 var adjustZ        =   0.00;
 var done           =  false;
@@ -48,6 +48,7 @@ function setSource(type, url)
    arToolkitSource = new THREEx.ArToolkitSource({	
 	   sourceType : type,
 	  sourceUrl : url,
+
    })
    arToolkitSource.init(function onReady(){
 	   onResize()    
@@ -66,7 +67,7 @@ function initialize()
 
 	// fov (degrees), aspect, near, far
 	//camera = new THREE.PerspectiveCamera(32, 16.0 / 9.0, 1, 1000);
-	camera = new THREE.PerspectiveCamera(90, 1, 0.1, 1000);
+	camera = new THREE.PerspectiveCamera(45,  window.innerWidth / window.innerHeight, 0.1, 1000);
 	mainScene.add(camera);
 
 	/**********************************************************************************************
@@ -81,11 +82,13 @@ function initialize()
 		alpha: true
 	});
 	renderer.setClearColor(new THREE.Color('lightgrey'), 0);
-	renderer.setSize(640, 640);
 	renderer.domElement.style.position = 'absolute';
 	renderer.domElement.style.top = '0px';
 	renderer.domElement.style.left = '0px';
 	renderer.shadowMap.enabled = true;
+	//renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+	//renderer.setSize(640, 640);
+	renderer.setSize(window.innerWidth, window.innerHeight); // Change here to render in low resolution (for example 640 x 480)
 	document.body.appendChild(renderer.domElement);
 
 	var clock = new THREE.Clock();
@@ -99,9 +102,9 @@ function initialize()
 	 *********************************************************************************************/
 
 	arToolkitSource = new THREEx.ArToolkitSource({
-		sourceType: "webcam",
+		//sourceType: "webcam",
 		//sourceType: "video", sourceUrl: "my-videos/video5.MOV",
-		//sourceType: "image", sourceUrl: "my-images/frame2.jpg",
+		sourceType: "image", sourceUrl: "my-images/imagem_2.jpg",
 	});
 	
 	
@@ -134,7 +137,7 @@ function initialize()
 	 *
 	 *********************************************************************************************/
 
-	var wood = new THREE.MeshPhongMaterial({map: loader.load("my-textures/face/wood.png")});
+	var wood = new THREE.MeshLambertMaterial({map: loader.load("my-textures/face/wood.png")});
 
 	var shadowMat = new THREE.ShadowMaterial({
 		opacity: 0.75,
@@ -168,7 +171,7 @@ function initialize()
 	var ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
 	origLight = new THREE.DirectionalLight(0xffffff);
 	origLight.castShadow = true;
-	var d = vObjRatio * vObjHeight * 40;
+	var d = vObjRatio * vObjHeight * 10;
 	origLight.shadow.camera.left   = -d;
 	origLight.shadow.camera.right  =  d;
 	origLight.shadow.camera.top    =  d;
@@ -217,7 +220,7 @@ function initialize()
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 	shadowPlane.receiveShadow = true;
-	vObj.castShadow           = true;
+	vObj.castShadow           = false;
 
 	shadowPlane.rotation.x = -Math.PI / 2;
 	shadowPlane.position.y = -0.05;
@@ -260,7 +263,7 @@ document.getElementById("select2").addEventListener("click", async () => {
               	setSource('webcam',null)
               	break;
         	case '1':
-              	setSource('image','my-images/frame.jpg')         
+              	setSource('image','my-images/imagem_1.jpg')         
               	break;
         	case '2':
               	setSource('image', 'my-images/frame2.jpg')                     
@@ -280,7 +283,7 @@ returnBtn.addEventListener('click', async () => {
               	setSource('webcam',null)
               	break;
         	case '1':
-              	setSource('image','my-images/frame.jpg')         
+              	setSource('image','my-images/imagem_1.jpg')         
               	break;
         	case '2':
               	setSource('image', 'my-images/frame2.jpg')                     
@@ -300,6 +303,9 @@ returnBtn.addEventListener('click', async () => {
 document.getElementById("submitButtonInput").addEventListener("click", async () => {
 	let value = select.value;
 	loaderElement.style.display = "block";
+
+	light.position.set(0, 10, 0);
+	renderer.render(mainScene, camera);
 
 	var $form = $("#submitButton");
 	var params = "";
@@ -382,15 +388,21 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 		var v = new THREE.Vector3(parseFloat(data[0]), parseFloat(data[1]), parseFloat(data[2]));
 		v.multiplyScalar(5);
 		v.add(vObj.position.clone());
-		console.log(v);
+		vObj.castShadow = true;
+		//let vec1 = v;
+		//let vec2 = new THREE.Vector3(-3, 5, -6);
+		//var ang = vec1.angleTo(vec2); // calcula dif angular
+		//console.log("Diferença angular entre vetores: " + radianosParaGraus(ang));
+		console.log("(" + v.x.toFixed(2) + ", " + v.y.toFixed(2) + ", " + v.z.toFixed(2) + ")");
 		light.position.set(v.x, v.y, v.z);
+		console.log(light.position)
 		switch (selectValue)
         {
         	case '0':
               	//setSource('webcam',null)
               	break;
         	case '1':
-              	//setSource('image','my-images/foto1.png')         
+              	//setSource('image','my-images/imagem_1.jpg')         
               	break;
         	case '2':
               	//setSource('image', 'my-images/frame2.jpg')                     
@@ -412,6 +424,9 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	})
 })
 
+function radianosParaGraus(radianos) {
+    return radianos * (180 / Math.PI);
+}
 
 function update()
 {

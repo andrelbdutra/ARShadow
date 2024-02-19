@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Basic Scene with Background and Marker</title>
+    <style>
+        body { margin: 0; }
+    </style>
+</head>
+<body>
+    <script src="https://threejs.org/build/three.js"></script>
+
+    <script>
+
+        // Criar cena
+        var scene = new THREE.Scene();
+        scene.background = new THREE.Color('grey'); // Background azul escuro
+
+        // Criar câmera
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 8, -8); // Ajustar a posição da câmera
+        camera.lookAt(0, 0, 0);
+
+        // Criar renderer com sombras
+        var renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // Adicionar plano de fundo à cena
+        var backgroundPlaneGeometry = new THREE.PlaneGeometry(35, 35);
+        var backgroundTextureLoader = new THREE.TextureLoader();
+        var backgroundTexture = backgroundTextureLoader.load('my-images/planoDeFundoPedra.jpg');
+        var backgroundPlaneMaterial = new THREE.MeshStandardMaterial({ map: backgroundTexture, side: THREE.DoubleSide });
+        var backgroundPlane = new THREE.Mesh(backgroundPlaneGeometry, backgroundPlaneMaterial);
+        backgroundPlane.rotation.x = Math.PI / 2;
+        backgroundPlane.receiveShadow = true; // Permitir que o plano de fundo receba sombras
+        scene.add(backgroundPlane);
+
+        // Adicionar plano menor com a imagem do marcador
+        var markerPlaneGeometry = new THREE.PlaneGeometry(2, 2); // Tamanho do plano do marcador
+        var markerTextureLoader = new THREE.TextureLoader();
+        var markerTexture = markerTextureLoader.load('my-images/kanji.png');
+        var markerPlaneMaterial = new THREE.MeshStandardMaterial({ map: markerTexture, side: THREE.DoubleSide, transparent: true });
+        var markerPlane = new THREE.Mesh(markerPlaneGeometry, markerPlaneMaterial);
+        markerPlane.position.y = 0.001; // Posicionar acima do plano de fundo
+        markerPlane.rotation.x = Math.PI / 2;
+        markerPlane.receiveShadow = true; // Permitir que o plano de fundo receba sombras
+        scene.add(markerPlane);
+
+        // Adicionar cilindro esquerdo
+        var leftCylinderGeometry = new THREE.CylinderGeometry(0.75, 0.75, 3, 32);
+        var leftCylinderMaterial = new THREE.MeshStandardMaterial({ color: 0x404040 }); // Cinza escuro
+        var leftCylinder = new THREE.Mesh(leftCylinderGeometry, leftCylinderMaterial);
+        leftCylinder.position.set(-3, 1.5, 0); // Posicionar à esquerda do marcador
+        leftCylinder.castShadow = true; // Permitir que o cilindro projete sombras
+        scene.add(leftCylinder);
+
+        // Adicionar cilindro direito
+        var rightCylinderGeometry = new THREE.CylinderGeometry(0.75, 0.75, 3, 32);
+        var rightCylinderMaterial = new THREE.MeshStandardMaterial({ color: 0x404040 }); // Cinza escuro
+        var rightCylinder = new THREE.Mesh(rightCylinderGeometry, rightCylinderMaterial);
+        rightCylinder.position.set(3, 1.5, 0); // Posicionar à direita do marcador
+        rightCylinder.castShadow = true; // Permitir que o cilindro projete sombras
+        scene.add(rightCylinder);
+
+        // Adicionar iluminação ambiente
+        var ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+        scene.add(ambientLight);
+
+        // Adicionar iluminação direcional com sombras
+        var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(3, 5, 5);
+        directionalLight.castShadow = true; // Permitir que a luz direcional projete sombras
+        scene.add(directionalLight);
+
+        // Configurar sombras
+        directionalLight.shadow.mapSize.width = 1024;
+        directionalLight.shadow.mapSize.height = 1024;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 50;
+
+        // Função de animação
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Renderizar a cena
+            renderer.render(scene, camera);
+            var imageDataURL = renderer.domElement.toDataURL("image_1/png");
+        }
+
+        // Iniciar a animação
+        animate();
+
+        // Atualizar tamanho da janela
+        window.addEventListener('resize', function () {
+            var newWidth = window.innerWidth;
+            var newHeight = window.innerHeight;
+
+            camera.aspect = newWidth / newHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(newWidth, newHeight);
+        });
+
+    </script>
+</body>
+</html>

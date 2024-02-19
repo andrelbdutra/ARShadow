@@ -117,6 +117,7 @@ app.post("/threejs", async (req, res) =>
 				const milissegundos = Math.floor(tempoDecorridoMs % 1000);
 				
 				console.log(`Tempo de processamento: ${horas}h:${minutos}m:${segundos}s:${milissegundos}ms`);
+				console.log(result)
 				res.end(result);
 			}
 		});
