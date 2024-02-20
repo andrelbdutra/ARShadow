@@ -99,6 +99,7 @@ app.post("/threejs", async (req, res) =>
 			var result = "vazio";
 			console.log({__dirname});
 			var child = spawn("node", [__dirname + "/child.js", pyData, req.body.scene]);
+			console.log("node child.js " + pyData + " " + req.body.scene);
 			child.stdout.on("data", (data) =>
 			{
 				const end = performance.now();
