@@ -10,8 +10,8 @@ var loader = new THREE.TextureLoader();
 var planeSize      = 150.00;
 var sPlaneSize     =  15.00;
 var sPlaneSegments = 300.00;
-var vObjHeight     =   1.25;
-var vObjRatio      =   1.75;
+var vObjHeight     =   1.20;
+var vObjRatio      =   1.00;
 var adjustX        =   0.00;
 var adjustZ        =   0.00;
 var done           =  false;
@@ -57,6 +57,14 @@ function setSource(type, url)
 
 function initialize()
 {
+	// let vec1 = new THREE.Vector3(-0.15, 0.77, -0.62)
+	// let vec2 = new THREE.Vector3(-5.25, 17.21, -14.58)
+	// //let vec1 = v;
+	// //let vec2 = new THREE.Vector3(-3, 5, -6);
+	// var ang = vec1.angleTo(vec2); // calcula dif angular
+	// console.log("Diferença angular entre vetores: " + radianosParaGraus(ang));
+	// vec2 = vec2.normalize();
+	// console.log("(" + vec2.x.toFixed(2) + ", " + vec2.y.toFixed(2) + ", "  + vec2.z.toFixed(2) + ")");
 	/**********************************************************************************************
 	 *
 	 * Cenas e iluminação
@@ -104,7 +112,7 @@ function initialize()
 	arToolkitSource = new THREEx.ArToolkitSource({
 		//sourceType: "webcam",
 		//sourceType: "video", sourceUrl: "my-videos/video5.MOV",
-		sourceType: "image", sourceUrl: "my-images/imagem_2.jpg",
+		sourceType: "image", sourceUrl: "my-images/teste_1.jpeg",
 	});
 	
 	
@@ -192,6 +200,7 @@ function initialize()
 	 *********************************************************************************************/
 
 	var cube   = new THREE.BoxBufferGeometry(vObjHeight, vObjHeight * vObjRatio, vObjHeight);
+	//var cube   = new THREE.BoxGeometry(1.2, 1.2, 1.2);
 	var plane  = new THREE.PlaneGeometry(planeSize, planeSize);
 	var splane = new THREE.PlaneGeometry(sPlaneSize, sPlaneSize, sPlaneSegments, sPlaneSegments);
 
