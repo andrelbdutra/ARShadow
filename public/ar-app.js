@@ -112,7 +112,7 @@ function initialize()
 	arToolkitSource = new THREEx.ArToolkitSource({
 		//sourceType: "webcam",
 		//sourceType: "video", sourceUrl: "my-videos/video5.MOV",
-		sourceType: "image", sourceUrl: "my-images/teste_1.jpeg",
+		sourceType: "image", sourceUrl: "my-images/new_imagem_10.jpg",
 	});
 	
 	

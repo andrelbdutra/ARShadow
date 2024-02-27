@@ -1,3 +1,4 @@
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r127/build/three.module.js';
 // Criar cena
 var scene = new THREE.Scene();
 scene.background = new THREE.Color('grey'); // Background azul escuro
@@ -42,13 +43,13 @@ scene.add(markerPlane);
 
 // CILINDROS //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// // Adicionar cilindro esquerdo
-// var leftCylinderGeometry = new THREE.CylinderGeometry(0.75, 0.75, 3, 32);
-// var leftCylinderMaterial = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); // Cinza escuro
-// var leftCylinder = new THREE.Mesh(leftCylinderGeometry, leftCylinderMaterial);
-// leftCylinder.position.set(-1.5, 1.5, -2); // Posicionar à esquerda do marcador
-// leftCylinder.castShadow = true; // Permitir que o cilindro projete sombras
-// scene.add(leftCylinder);
+// Adicionar cilindro esquerdo
+var leftCylinderGeometry = new THREE.CylinderGeometry(0.75, 0.75, 3, 32);
+var leftCylinderMaterial = new THREE.MeshStandardMaterial({ color: 0xADD8E6 }); // Cinza escuro
+var leftCylinder = new THREE.Mesh(leftCylinderGeometry, leftCylinderMaterial);
+leftCylinder.position.set(-3, 1.5, 0); // Posicionar à esquerda do marcador
+leftCylinder.castShadow = true; // Permitir que o cilindro projete sombras
+scene.add(leftCylinder);
 
 // // Adicionar cilindro direito
 // var rightCylinderGeometry = new THREE.CylinderGeometry(0.75, 0.75, 3, 32);
@@ -68,13 +69,13 @@ scene.add(markerPlane);
 // leftSphere.castShadow = true; // Permitir que a esfera projete sombras
 // scene.add(leftSphere);
 
-// Adicionar esfera à direita do marcador
-var rightSphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-var rightSphereMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff }); // Cinza escuro
-var rightSphere = new THREE.Mesh(rightSphereGeometry, rightSphereMaterial);
-rightSphere.position.set(3.5, 1, -0.5); // Posicionar à direita do marcador
-rightSphere.castShadow = true; // Permitir que a esfera projete sombras
-scene.add(rightSphere);
+// // Adicionar esfera à direita do marcador
+// var rightSphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+// var rightSphereMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff }); // Cinza escuro
+// var rightSphere = new THREE.Mesh(rightSphereGeometry, rightSphereMaterial);
+// rightSphere.position.set(1, 1, 3); // Posicionar à direita do marcador
+// rightSphere.castShadow = true; // Permitir que a esfera projete sombras
+// scene.add(rightSphere);
 
 // CONES /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -96,22 +97,29 @@ scene.add(rightSphere);
 
 // cubos ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Adicionar cubo à esquerda do marcador
-var leftCubeGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-var leftCubeMaterial = new THREE.MeshStandardMaterial({ color: 0xD8BFD8 }); // Cinza escuro
-var leftCube = new THREE.Mesh(leftCubeGeometry, leftCubeMaterial);
-leftCube.position.set(-3.5, 0.75, 1); // Posicionar à esquerda do marcador
-leftCube.castShadow = true; // Permitir que o cubo projete sombras
-scene.add(leftCube);
+// // Adicionar cubo à esquerda do marcador
+// var leftCubeGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+// var leftCubeMaterial = new THREE.MeshStandardMaterial({ color: 0xD8BFD8 }); // Cinza escuro
+// var leftCube = new THREE.Mesh(leftCubeGeometry, leftCubeMaterial);
+// leftCube.position.set(-2, 0.75, -3); // Posicionar à esquerda do marcador
+// leftCube.castShadow = true; // Permitir que o cubo projete sombras
+// scene.add(leftCube);
 
-// // Adicionar cubo à direita do marcador
-// var rightCubeGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-// var rightCubeMaterial = new THREE.MeshStandardMaterial({ color: 0xD8BFD8 }); // Cinza escuro
-// var rightCube = new THREE.Mesh(rightCubeGeometry, rightCubeMaterial);
-// //rightCube.position.set(2, 0.75, 3); // Posicionar à direita do marcador
-// rightCube.position.set(2.5, 0.75, 1); // Posicionar à direita do marcador
-// rightCube.castShadow = true; // Permitir que o cubo projete sombras
-// scene.add(rightCube);
+// var middleCubeGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+// var middleCubeMaterial = new THREE.MeshStandardMaterial({ color: 0xD8BFD8 }); // Cinza escuro
+// var middleCube = new THREE.Mesh(middleCubeGeometry, middleCubeMaterial);
+// middleCube.position.set(-1.5, 0.75, -3); // Posicionar à esquerda do marcador
+// middleCube.castShadow = true; // Permitir que o cubo projete sombras
+// scene.add(middleCube);
+
+// Adicionar cubo à direita do marcador
+var rightCubeGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+var rightCubeMaterial = new THREE.MeshStandardMaterial({ color: 0xD8BFD8 }); // Cinza escuro
+var rightCube = new THREE.Mesh(rightCubeGeometry, rightCubeMaterial);
+//rightCube.position.set(2, 0.75, 3); // Posicionar à direita do marcador
+rightCube.position.set(3, 0.75, 0); // Posicionar à direita do marcador
+rightCube.castShadow = true; // Permitir que o cubo projete sombras
+scene.add(rightCube);
 
 // CUBO
 var vObjHeight     =   1.5;
@@ -126,22 +134,13 @@ scene.add(vObj)
 vObj.position.set(0, vObjRatio * vObjHeight / 2, 0);
 
 // Adicionar iluminação ambiente
-var ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+var ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambientLight);
 
 // Adicionar iluminação direcional com sombras
-var directionalLight = new THREE.DirectionalLight(0xffffff, 5);
-directionalLight.position.set(-3, 4, -3);
-// CENA 29 (-1, 5, -4)
-// CENA 27 (-3, 5, -6)
-// CENA 28 (1, 4, -6)
-// CENA 30 (1.5, 5, -4)
-// CENA 32 (3, 3, -1)
-// CENA 36 (-4, 8, -6)
-// CENA 39 (5, 8, -6)
-// CENA 40 (4, 5, -2)
-//-1.7355596024953264 2.7374951847682496 -2.3192557429655767
-//-1.8627768324374536 3.5248308424302066 -2.0047821505178396
+var directionalLight = new THREE.DirectionalLight(0xffffff, 1.15);
+directionalLight.position.set(-1, 6, -5);
+
 directionalLight.castShadow = true; // Permitir que a luz direcional projete sombras
 scene.add(directionalLight);
 
