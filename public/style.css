@@ -27,6 +27,13 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+.floating-change-obj{
+    position: fixed; 
+    z-index: 99999;
+    right: 2%;
+    top: 2%;
+}
+
 .floating-sendBtn{
     position: fixed; 
     z-index: 99999;

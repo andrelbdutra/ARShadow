@@ -16,6 +16,10 @@ var adjustX        =   0.00;
 var adjustZ        =   0.00;
 var done           =  false;
 
+var objLoader = new THREE.OBJLoader();
+var mtlLoader = new THREE.MTLLoader();
+var objObject = null;
+
 const loaderElement = document.createElement("div");
 loaderElement.setAttribute("class", "loader");	
 loaderElement.setAttribute("id", "loader");
@@ -26,6 +30,8 @@ const returnBtn = document.getElementById("returnButton");
 returnBtn.style.display = "none";
 const select2 = document.getElementById("select2");
 loaderElement.style.display = "none";
+const changeObjBtn = document.getElementById("toggleObjectButton");
+changeObjBtn.style.display = "none";
 
 initialize();
 animate();
@@ -112,7 +118,7 @@ function initialize()
 	arToolkitSource = new THREEx.ArToolkitSource({
 		//sourceType: "webcam",
 		//sourceType: "video", sourceUrl: "my-videos/video5.MOV",
-		sourceType: "image", sourceUrl: "my-images/new_imagem_10.jpg",
+		sourceType: "image", sourceUrl: "my-images/real2_3_1.jpeg",
 	});
 	
 	
@@ -305,6 +311,7 @@ returnBtn.addEventListener('click', async () => {
 	select.style.display = "block";
 	select2.style.display = "block";
 	submitBtn.style.display = "block";
+	changeObjBtn.style.display = "none";
 	returnBtn.style.display = "none";
 	light.position.set(0, 10, 0);
 });
@@ -383,6 +390,7 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	posting.done(function(data)
 	{
 		returnBtn.style.display = "block";
+		changeObjBtn.style.display = "block";
 		loaderElement.style.display = "none";
 		const end = performance.now();
 		const tempoDecorridoMs = end - start;
@@ -425,6 +433,7 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	submitBtn.style.display = "none";
 	select.style.display = "none";
 	select2.style.display = "none";
+	changeObjBtn.style.display = "none";
 
 	posting.fail(function(response) {
 		returnBtn.style.display = "block";
@@ -432,6 +441,50 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 		alert('Error: ' + response.responseText);
 	})
 })
+
+function loadOBJObject(objUrl, mtlUrl) {
+    mtlLoader.load(mtlUrl, function (materials) {
+        materials.preload();
+
+        objLoader.setMaterials(materials);
+        objLoader.load(objUrl, function (object) {
+            objObject = object;
+            objObject.scale.set(0.75, 0.75, 0.75);
+            objObject.position.set(0, 0, 0);
+            objObject.traverse(function (child) {
+                if (child instanceof THREE.Mesh) {
+                    child.castShadow = true;
+                }
+            });
+
+            if (isCubeVisible) {
+                scene.remove(vObj);
+                scene.add(objObject);
+                isCubeVisible = false;
+            }
+        });
+    });
+}
+var isCubeVisible = true;
+
+document.getElementById('toggleObjectButton').addEventListener('click', toggleObject);
+function toggleObject() {
+    if (isCubeVisible) {
+        scene.remove(vObj);
+        if (objObject) {
+            scene.add(objObject);
+        } else {
+            // Carregar o objeto .obj e seu material .mtl se ainda não foram carregados
+			loadOBJObject('assets/objs/Stool/Stool.obj', 'assets/objs/Stool/Stool.mtl');
+            return; // Sai da função para evitar definir isCubeVisible como false antes do objeto ser carregado
+        }
+        isCubeVisible = false;
+    } else {
+        scene.remove(objObject);
+        scene.add(vObj);
+        isCubeVisible = true;
+    }
+}
 
 function radianosParaGraus(radianos) {
     return radianos * (180 / Math.PI);
