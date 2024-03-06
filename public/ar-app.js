@@ -18,6 +18,7 @@ var done           =  false;
 
 var objLoader = new THREE.OBJLoader();
 var mtlLoader = new THREE.MTLLoader();
+var GLTFLoader = new THREE.GLTFLoader();
 var objObject = null;
 
 const loaderElement = document.createElement("div");
@@ -29,9 +30,9 @@ const submitBtn = document.getElementById("submitButton");
 const returnBtn = document.getElementById("returnButton");
 returnBtn.style.display = "none";
 const select2 = document.getElementById("select2");
+const select3 = document.getElementById("select3");
+select3.style.display = "none";
 loaderElement.style.display = "none";
-const changeObjBtn = document.getElementById("toggleObjectButton");
-changeObjBtn.style.display = "none";
 
 initialize();
 animate();
@@ -118,7 +119,7 @@ function initialize()
 	arToolkitSource = new THREEx.ArToolkitSource({
 		//sourceType: "webcam",
 		//sourceType: "video", sourceUrl: "my-videos/video5.MOV",
-		sourceType: "image", sourceUrl: "my-images/real2_3_1.jpeg",
+		sourceType: "image", sourceUrl: "my-images/real2_1_1.jpeg",
 	});
 	
 	
@@ -311,7 +312,7 @@ returnBtn.addEventListener('click', async () => {
 	select.style.display = "block";
 	select2.style.display = "block";
 	submitBtn.style.display = "block";
-	changeObjBtn.style.display = "none";
+	select3.style.display = "none";
 	returnBtn.style.display = "none";
 	light.position.set(0, 10, 0);
 });
@@ -390,7 +391,7 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	posting.done(function(data)
 	{
 		returnBtn.style.display = "block";
-		changeObjBtn.style.display = "block";
+		select3.style.display = "block";
 		loaderElement.style.display = "none";
 		const end = performance.now();
 		const tempoDecorridoMs = end - start;
@@ -442,49 +443,154 @@ document.getElementById("submitButtonInput").addEventListener("click", async () 
 	})
 })
 
-function loadOBJObject(objUrl, mtlUrl) {
-    mtlLoader.load(mtlUrl, function (materials) {
-        materials.preload();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Funções para carregar objetos GLTF
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var loadedObjects = {};
+var currentObject = vObj; // Inicializa com o cubo como objeto padrão
+var currentFile = null; // Arquivo GLTF atualmente selecionado
 
-        objLoader.setMaterials(materials);
-        objLoader.load(objUrl, function (object) {
-            objObject = object;
-            objObject.scale.set(0.75, 0.75, 0.75);
-            objObject.position.set(0, 0, 0);
-            objObject.traverse(function (child) {
-                if (child instanceof THREE.Mesh) {
-                    child.castShadow = true;
-                }
-            });
+function onError() { };
 
-            if (isCubeVisible) {
-                scene.remove(vObj);
-                scene.add(objObject);
-                isCubeVisible = false;
-            }
-        });
-    });
-}
-var isCubeVisible = true;
-
-document.getElementById('toggleObjectButton').addEventListener('click', toggleObject);
-function toggleObject() {
-    if (isCubeVisible) {
-        scene.remove(vObj);
-        if (objObject) {
-            scene.add(objObject);
-        } else {
-            // Carregar o objeto .obj e seu material .mtl se ainda não foram carregados
-			loadOBJObject('assets/objs/Stool/Stool.obj', 'assets/objs/Stool/Stool.mtl');
-            return; // Sai da função para evitar definir isCubeVisible como false antes do objeto ser carregado
-        }
-        isCubeVisible = false;
-    } else {
-        scene.remove(objObject);
-        scene.add(vObj);
-        isCubeVisible = true;
+function onProgress ( xhr, model ) {
+    if ( xhr.lengthComputable ) {
+      var percentComplete = xhr.loaded / xhr.total * 100;
     }
 }
+
+export function getMaxSize(obj) {
+	var maxSize;
+	var box = new THREE.Box3().setFromObject(obj);
+	var min = box.min;
+	var max = box.max;
+ 
+	var size = new THREE.Box3();
+	size.x = max.x - min.x;
+	size.y = max.y - min.y;
+	size.z = max.z - min.z;
+ 
+	if (size.x >= size.y && size.x >= size.z)
+	   maxSize = size.x;
+	else {
+	   if (size.y >= size.z)
+		  maxSize = size.y;
+	   else {
+		  maxSize = size.z;
+	   }
+	}
+	return maxSize;
+}
+
+// Normalize scale and multiple by the newScale
+function normalizeAndRescale(obj, newScale) {
+	var scale = getMaxSize(obj);
+	obj.scale.set(newScale * (1.0 / scale),
+	  newScale * (1.0 / scale),
+	  newScale * (1.0 / scale));
+	return obj;
+}
+  
+function fixPosition(obj) {
+	// Fix position of the object over the ground plane
+	var box = new THREE.Box3().setFromObject(obj);
+	if (box.min.y > 0)
+	  obj.translateY(-box.min.y);
+	else
+	  obj.translateY(-1 * box.min.y);
+	return obj;
+}
+
+
+function loadGLTFFile(file, desiredScale, angle) {
+    var loader = new THREE.GLTFLoader();
+    loader.load(file, function(gltf) {
+        var obj = gltf.scene;
+        obj.castShadow = true;
+        obj.traverse(function(child) {
+            if (child) {
+                child.castShadow = true;
+            }
+        });
+        obj.traverse(function(node) {
+            if (node.material) node.material.side = THREE.DoubleSide;
+        });
+
+        obj = normalizeAndRescale(obj, desiredScale);
+        obj = fixPosition(obj);
+        obj.rotateY(THREE.MathUtils.degToRad(angle));
+
+        loadedObjects[file] = obj; // Armazena o objeto carregado
+        if (file === currentFile) { // Verifica se o objeto é o atualmente selecionado
+            currentObject = obj;
+            scene.add(currentObject);
+        }
+    }, onProgress, onError);
+}
+
+
+document.getElementById('select3').addEventListener('change', function() {
+    var selectedValue = this.value;
+    var file;
+    var desiredScale = 1;
+    var angle = 0;
+
+    // Remove o objeto atualmente exibido
+    if (currentObject) {
+        scene.remove(currentObject);
+    }
+
+    // Define o arquivo e parâmetros com base no valor selecionado
+    switch (selectedValue) {
+        case '0':
+            currentObject = vObj;
+			desiredScale = 1;
+			file = 'cube'; // Valor especial para o cubo
+            break;
+        case '1':
+            file = 'assets/objs/basket.glb';
+			desiredScale = 1.5;
+            break;
+        case '2':
+            file = 'assets/objs/cubwooden.glb';
+			desiredScale = 2;
+            break;
+        case '3':
+            file = 'assets/objs/dog.glb';
+			desiredScale = 3;
+            break;
+		case '4':
+			file = 'assets/objs/house.glb';
+			desiredScale = 2;
+			break;
+		case '5':
+			file = 'assets/objs/statueLaRenommee.glb';
+			desiredScale = 2.5;
+			break;
+		case '6':
+			file = 'assets/objs/woodenGoose.glb';
+			desiredScale = 2.5;
+			break;
+        default:
+            currentObject = vObj; // Valor padrão para o cubo
+			desiredScale = 1;
+			file = 'cube';
+    }
+
+    // Atualiza o arquivo atualmente selecionado
+    currentFile = file;
+
+    // Carrega e exibe o objeto selecionado
+    if (file !== 'cube') {
+        if (loadedObjects[file]) {
+            currentObject = loadedObjects[file];
+            scene.add(currentObject);
+        } else {
+            loadGLTFFile(file, desiredScale, angle);
+        }
+    } else {
+        scene.add(currentObject);
+    }
+});
 
 function radianosParaGraus(radianos) {
     return radianos * (180 / Math.PI);
